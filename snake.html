@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<style type="text/css">
+		* {
+			/*margin: 0 auto;*/
+		}
+
+		.outer {
+			width: 300px;
+			height: 300px;
+			top: 100px;
+			border: 1px solid red;
+			margin: 0 auto;
+			position: relative;
+			background-image: url(img/t012002f41c6a8a946d.jpg);
+			display: block;
+		}
+
+		.outer i {
+			position: absolute;
+			top: 0;
+			left: 0;
+			display: block;
+		}
+
+		.play {
+			position: absolute;
+			margin: 0 auto;
+			left: 300px;
+			float: left;
+		}
+
+		.ocer {
+			position: absolute;
+			margin: 0 auto;
+			left: 450px;
+			float: left;
+		}
+	</style>
+</head>
+
+<body>
+	<button class="play">开始游戏</button>
+	<p class="ocer">0</p>
+	<div class="outer"></div>
+
+</body>
+<script type="text/javascript">
+	var outer = document.querySelector('.outer')
+	var Ocer = document.querySelector('.ocer')
+	var clear;
+	var ocer = 0
+	var blocksize = 10
+	var Blockwidth = parseInt(window.getComputedStyle(outer).width) / blocksize
+	var Blockheight = parseInt(window.getComputedStyle(outer).height) / blocksize
+	var gameOver = false
+	//控制子节点在outer移动的位置
+	var Block = function (col, row) {
+		this.col = col
+		this.row = row
+	}
+	//构造函数 大驼峰写法  开头大写
+	Block.prototype.draw = function (color) {
+		//删除旧节点
+		if (this.node) {
+			outer.removeChild(this.node)
+		}
+		//构造i节点
+		this.node = document.createElement('i')
+		this.node.style.width = blocksize + 'px'
+		this.node.style.height = blocksize + 'px'
+		this.node.style.background = color
+		this.node.style.left = (this.col - 1) * blocksize + 'px'
+		this.node.style.top = (this.row - 1) * blocksize + 'px'
+		outer.appendChild(this.node)
+	}
+	//Snake身体
+	var Snake = function () {
+		this.segments = [
+			// new Block(29, 1),
+			// new Block(28, 1),
+			// new Block(27, 1),
+			// new Block(26, 1),
+			// new Block(25, 1),
+			// new Block(24, 1),
+			// new Block(23, 1),
+			// new Block(22, 1)
+
+						new Block(5,1),
+						new Block(4,1),
+						new Block(3,1),
+						new Block(2,1),
+						new Block(1,1)
+		]
+		this.direction = 'right'
+		this.nextdirection = 'right'
+	}
+	//调用Snake里面数组的所以元素 ，把元素返回给函数
+	Snake.prototype.draw = function () {
+		this.segments.forEach(function (element, index) {
+			if (index === 0) {
+				element.draw('blue')
+			} else {
+				element.draw('orange')
+			}
+
+		})
+	}
+	//snake移动
+	Snake.prototype.move = function () {
+		this.direction = this.nextdirection
+		var head = this.segments[0]
+		this.newhead
+		debugger
+		//
+		//			var newhead = new Block(head.col + 1, head.row)
+		//控制蛇头方向
+		switch (this.direction) {
+			case 'right':
+				this.newhead = new Block(head.col + 1, head.row)
+				break;
+			case 'left':
+				this.newhead = new Block(head.col - 1, head.row)
+				break;
+			case 'up':
+				this.newhead = new Block(head.col, head.row - 1)
+				break;
+			case 'down':
+				this.newhead = new Block(head.col, head.row + 1)
+				break;
+		}
+		//撞墙
+		if (this.newhead.col < 1 || this.newhead.col > Blockwidth || this.newhead.row < 1 || this.newhead.row > Blockheight) {
+
+			clearInterval(clear)
+			alert('撞墙了!')
+			gameOver = true
+			location.reload()
+
+		}
+		//撞自己
+		for (var i = 1; i < this.segments.length; i++) {
+			if (this.newhead.col === this.segments[i].col && this.newhead.row === this.segments[i].row) {
+				clearInterval(clear)
+				alert('撞自己了!')
+				location.reload()
+			}
+		}
+		this.segments.unshift(this.newhead)
+		//吃到苹果,移动苹果。没吃到只移动snake身体，不加长
+		if (this.newhead.col === apple.segment.col && this.newhead.row === apple.segment.row) {
+			apple.move()
+			apple.draw()
+		} else {
+			//删除旧尾巴。重新画
+			var tail = this.segments.pop()
+			//删除尾巴
+			outer.removeChild(tail.node)
+		}
+	}
+
+	//
+	Snake.prototype.setDirection = function (newdirection) {
+		if (this.direction === 'right' && newdirection === 'left') {
+			return
+		}
+		if (this.direction === 'left' && newdirection === 'right') {
+			return
+		}
+		if (this.direction === 'up' && newdirection === 'down') {
+			return
+		}
+		if (this.direction === 'down' && newdirection === 'up') {
+			return
+		}
+		this.nextdirection = newdirection
+	}
+	//创建一个随机数
+	var runNum = function (params) {
+		return Math.ceil(Math.random() * params)
+	}
+	//Apple的位置
+	var Apple = function () {
+		this.segment = new Block(10, 1)
+	}
+	//Apple的颜色
+	Apple.prototype.draw = function () {
+		this.segment.draw('red')
+	}
+	Apple.prototype.move = function () {
+		//方法1 新建一个苹果对象，删除旧苹果
+		var runumcol = runNum(Blockwidth)
+		var runumrow = runNum(Blockheight)
+		//			//新建一个苹果对象，删除旧的苹果
+		outer.removeChild(this.segment.node)
+		this.segment = new Block(runumcol, runumrow)
+		ocer++;
+		Ocer.innerText = ocer
+	}
+
+	//键盘
+	var directions = {
+		37: 'left',
+		38: 'up',
+		39: 'right',
+		40: 'down',
+	}
+
+	//游戏主要运行
+	var snake = new Snake()
+	snake.draw()
+	var apple = new Apple()
+	apple.draw()
+	//键盘事件  二种方法
+	window.onkeydown = function (e) {
+		//				snake.direction = directions[e.keyCode]
+		snake.setDirection(directions[e.keyCode])
+	}
+	//事件监听
+	document.querySelector('button').addEventListener('click', function () {
+		gameOver = false
+		clear = setInterval(function () {
+			snake.move()
+			if (gameOver) {
+				return
+			}
+			
+			snake.draw()
+			
+		}, 100)
+	})
+</script>
+
+</html>
