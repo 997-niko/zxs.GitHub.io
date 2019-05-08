@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+</head>
+<style>
+    .outer {
+        width: 200px;
+        position: relative;
+        overflow: hidden;
+    }
+    .box {
+        width: 800px;
+        position: absolute
+        overflow: hidden;
+    }
+    .box img {
+        width: 200px;
+        float: left;
+        
+    }
+</style>
+<body>
+    <div class="outer">
+        <div class="box">
+            <img src="img/1.jpg">
+            <img src="img/2.jpg">
+            <img src="img/3.jpg">
+            <img src="img/4.jpg">
+        </div>
+        <input type="button" value="上一张" class="left">
+        <input type="button" value="下一张"  class="right">
+    </div>
+</body>
+<script>
+    // 下一张
+    $('.right').click(function() {
+        $('.box').animate( {
+            marginLeft: "-200px"
+        }, 600 , function (){
+             $('.box img').eq(0).appendTo('.box')
+              $('.box').css({
+                   marginLeft: "0px"
+              })
+        });
+    });
+        // 上一张
+            $('.left').click(function () {
+               $('.box').css({
+                    marginLeft: "-200px"
+               })
+               $('.box img').eq(3).prependTo('.box')
+               $('.box').animate({
+                   marginLeft: "0px"
+               },600)
+            });
+</script>
+</html>
